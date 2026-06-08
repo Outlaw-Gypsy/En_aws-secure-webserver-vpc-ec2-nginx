@@ -42,7 +42,6 @@ The architecture includes the following components:
 - EC2 Instance
 - Nginx Web Server
 
-![Architecture Diagram](screenshots/01-architecture-diagram.png)
 
 ## Architecture Explanation
 
