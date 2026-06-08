@@ -185,3 +185,49 @@ The public subnet is where the EC2 instance will be launched. At this point, the
 I learned that a subnet is a smaller IP range inside a VPC. I also learned that a subnet is not automatically public just because it is named public. It becomes public only when its route table sends internet-bound traffic to an Internet Gateway.
 
 ---
+
+## Stage 5: Create and Attach an Internet Gateway
+
+### Purpose
+
+An Internet Gateway allows communication between a VPC and the internet.
+
+I created an Internet Gateway so that resources inside my VPC can later become publicly accessible when the correct route table configuration is added.
+
+### Internet Gateway Configuration
+
+| Setting | Value |
+|---|---|
+| Internet Gateway Name | `cloud-webserver-igw` |
+| Attached VPC | `cloud-webserver-vpc` |
+| VPC CIDR Block | `10.0.0.0/16` |
+| State | `Attached` |
+
+### Steps Taken
+
+1. I opened the AWS Management Console.
+2. I searched for `VPC` and opened the VPC dashboard.
+3. From the left navigation menu, I clicked `Internet gateways`.
+4. I clicked `Create internet gateway`.
+5. I entered the name `cloud-webserver-igw`.
+6. I clicked `Create internet gateway`.
+7. After the Internet Gateway was created, I clicked `Actions`.
+8. I selected `Attach to VPC`.
+9. I selected my custom VPC named `cloud-webserver-vpc`.
+10. I clicked `Attach internet gateway`.
+
+### Screenshot
+
+![Internet Gateway Attached](screenshots/04-internet-gateway-attached.png)
+
+### Explanation
+
+The Internet Gateway acts as the connection point between the VPC and the public internet.
+
+At this stage, the gateway has been created and attached to the VPC, but the subnet is not fully public yet. A route table still needs to be configured with a default route that sends internet-bound traffic to the Internet Gateway.
+
+### What I Learned
+
+I learned that attaching an Internet Gateway to a VPC does not automatically make resources public. A route table must also contain a route such as `0.0.0.0/0` pointing to the Internet Gateway.
+
+---
