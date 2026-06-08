@@ -231,3 +231,58 @@ At this stage, the gateway has been created and attached to the VPC, but the sub
 I learned that attaching an Internet Gateway to a VPC does not automatically make resources public. A route table must also contain a route such as `0.0.0.0/0` pointing to the Internet Gateway.
 
 ---
+
+## Stage 6: Configure the Route Table and Subnet Association
+
+### Purpose
+
+A route table controls where network traffic is directed inside a VPC.
+
+I created a custom route table for the public subnet and added a default route that sends internet-bound traffic to the Internet Gateway.
+
+### Route Table Configuration
+
+| Setting | Value |
+|---|---|
+| Route Table Name | `cloud-webserver-public-rt` |
+| VPC | `cloud-webserver-vpc` |
+| Public Subnet | `cloud-webserver-public-subnet` |
+| Internet Gateway | `cloud-webserver-igw` |
+| Public Route | `0.0.0.0/0 -> Internet Gateway` |
+
+### Steps Taken
+
+1. I opened the AWS Management Console.
+2. I searched for `VPC` and opened the VPC dashboard.
+3. From the left navigation menu, I clicked `Route tables`.
+4. I clicked `Create route table`.
+5. I entered the name `cloud-webserver-public-rt`.
+6. I selected my custom VPC named `cloud-webserver-vpc`.
+7. I clicked `Create route table`.
+8. I selected the newly created route table.
+9. I clicked the `Routes` tab.
+10. I clicked `Edit routes`.
+11. I clicked `Add route`.
+12. I entered the destination `0.0.0.0/0`.
+13. For the target, I selected the Internet Gateway named `cloud-webserver-igw`.
+14. I clicked `Save changes`.
+15. I clicked the `Subnet associations` tab.
+16. I clicked `Edit subnet associations`.
+17. I selected the public subnet named `cloud-webserver-public-subnet`.
+18. I clicked `Save associations`.
+
+### Screenshot
+
+![Route Table Configured](screenshots/05-route-table-configured.png)
+
+### Explanation
+
+The route table contains a default route, `0.0.0.0/0`, that points to the Internet Gateway.
+
+This route allows resources in the associated public subnet to send traffic to the internet. The subnet became public because it is associated with a route table that has a route to the Internet Gateway.
+
+### What I Learned
+
+I learned that a subnet is not public just because it has the word "public" in its name. A subnet becomes public when it is associated with a route table that has a default route to an Internet Gateway.
+
+---
