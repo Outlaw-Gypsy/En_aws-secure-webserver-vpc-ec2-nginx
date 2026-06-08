@@ -647,7 +647,7 @@ sudo systemctl status nginx
 11. I opened the EC2 public IPv4 address in my browser.
 12. I confirmed that my custom webpage loaded successfully.
 
-![Custom Webpage](screenshots/11-custom-webpage-browser)
+![Custom Webpage](screenshots/11-custom-webpage-browser.png)
 
 ### Explanation
 
