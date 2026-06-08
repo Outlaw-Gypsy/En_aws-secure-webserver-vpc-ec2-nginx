@@ -471,6 +471,9 @@ The general SSH command format is:
 ```bash
 ssh -i path-to-key-file ubuntu@EC2_PUBLIC_IPV4
 ```
+
+### Screenshot: SSH Connected
+
 ![SSH connected](screenshots/08-ssh-connected.png)
 
 ### Explanation
@@ -589,7 +592,12 @@ sudo systemctl status nginx
 9. I opened the public IPv4 address in my browser using HTTP.
 10. I confirmed that the default Nginx welcome page loaded successfully.
 
+### Screenshot: Nginx Running
+
 ![Nginx running](screenshots/09-nginx-service-running.png)
+
+### Screenshot: Nginx Default Page
+
 ![Nginx default page](screenshots/10-nginx-default-page.png)
 
 ### Explanation
@@ -646,6 +654,8 @@ sudo systemctl status nginx
 10. I checked that Nginx was still active and running.
 11. I opened the EC2 public IPv4 address in my browser.
 12. I confirmed that my custom webpage loaded successfully.
+
+### Screenshot: Custom Webpage
 
 ![Custom Webpage](screenshots/11-custom-webpage-browser.png)
 
