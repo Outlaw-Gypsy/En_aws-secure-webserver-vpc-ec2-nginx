@@ -397,3 +397,372 @@ I restricted SSH to:
 My IP
 ```
 This follows the principle of least privilege because only my current IP address can attempt to connect to the instance through SSH.
+
+---
+
+## Stage 9: Connect to the EC2 Instance Using SSH
+
+### Purpose
+
+SSH, which stands for Secure Shell, allows secure remote access from my local computer into the EC2 instance.
+
+In this stage, I used SSH to connect to the Ubuntu EC2 instance so I could manage the server from the terminal and later install Nginx.
+
+---
+
+### SSH Connection Requirements
+
+To connect successfully to the EC2 instance, I needed the following:
+
+| Requirement | Description |
+|---|---|
+| Private key file | The `.pem` key downloaded when creating the EC2 key pair |
+| EC2 username | `ubuntu` because I used an Ubuntu Server AMI |
+| Public IPv4 address | The current public IP address assigned to the EC2 instance |
+| Security group rule | Inbound SSH access on port `22` allowed from my IP address |
+| Correct file permission | The private key file must not be publicly readable |
+
+---
+
+### SSH Details
+
+| Setting | Value |
+|---|---|
+| Key Pair | `cloud-webserver-key.pem` |
+| Local Key Location | `Downloads` folder |
+| EC2 Username | `ubuntu` |
+| SSH Port | `22` |
+| Authentication Method | SSH private key |
+| SSH Source | My current public IP address |
+
+---
+
+### Steps Taken
+
+1. I returned to the AWS Management Console.
+2. I opened the EC2 dashboard.
+3. I selected my EC2 instance.
+4. I started the instance because it had been stopped earlier.
+5. I waited until the instance state changed to `Running`.
+6. I confirmed that the status checks passed.
+7. I copied the current public IPv4 address from the EC2 instance details page.
+8. I opened my terminal on my local machine.
+9. I navigated to the folder where my private key was stored.
+10. I attempted to connect to the EC2 instance using SSH.
+11. The first SSH attempt failed with a timeout error.
+12. I investigated the security group attached to the EC2 instance.
+13. I discovered that the SSH inbound rule was not allowing access from my current public IP address.
+14. I edited the security group inbound rules.
+15. I updated the SSH rule to allow port `22` from `My IP`.
+16. I saved the updated security group rule.
+17. I retried the SSH connection.
+18. The SSH connection succeeded.
+
+---
+
+### Command Used
+
+Because my key was stored in the `Downloads` folder, I connected using:
+
+```bash
+ssh -i cloud-webserver-key.pem ubuntu@13.62.127.173
+```
+The general SSH command format is:
+```bash
+ssh -i path-to-key-file ubuntu@EC2_PUBLIC_IPV4
+```
+![SSH connected](screenshots/08-ssh-connected.png)
+
+### Explanation
+
+The SSH connection uses the private key file to authenticate into the EC2 instance. Since I used an Ubuntu AMI, the correct default username was ubuntu.
+The EC2 instance also needed to have a public IPv4 address, and the security group had to allow inbound SSH traffic on port 22.
+At first, the connection failed because my SSH traffic was not allowed by the security group. After updating the SSH source to my current IP address, the connection succeeded.
+
+### Challenge Encountered: SSH Connection Timed Out
+Problem
+
+When I tried to connect to the EC2 instance using SSH, the connection timed out.
+
+Error Message
+```text
+ssh: connect to host 13.62.127.173 port 22: Operation timed out
+```
+### What the Error Means
+
+This error means my local machine could not reach the EC2 instance on port 22.
+
+This was not a private key problem. If the private key was wrong, the error would likely have been:
+```text
+Permission denied (publickey)
+```
+Since the error was a timeout, it meant the SSH request was being blocked or could not reach the instance.
+
+### Cause
+
+The issue was caused by the security group inbound rule.
+
+The SSH rule was not allowing access from my current public IP address.
+
+This likely happened because I stopped the EC2 instance and continued the project later from a network whose public IP address was different from the one previously allowed in the security group.
+
+The security group itself did not reset. Instead, the source IP allowed for SSH no longer matched my current public IP address.
+
+### Solution
+
+To fix the issue, I updated the security group inbound rule for SSH.
+
+I followed these steps:
+
+1. I opened the AWS Management Console.
+2. I went to the EC2 dashboard.
+3. I selected my running EC2 instance.
+4. I clicked the Security tab.
+5. I opened the security group attached to the instance.
+6. I clicked Edit inbound rules.
+7. I found the SSH rule for port 22.
+8. I changed the source to My IP.
+9. I saved the rule.
+10. I retried the SSH command from my terminal.
+11. The SSH connection worked successfully.
+
+### Security Group Rule After Fix
+| Type  | Protocol |  Port | Source      | Purpose                                                  |
+| ----- | -------- | ----: | ----------- | -------------------------------------------------------- |
+| SSH   | TCP      |  `22` | `My IP`     | Allows SSH access only from my current public IP address |
+| HTTP  | TCP      |  `80` | `0.0.0.0/0` | Allows users to access the web server in a browser       |
+| HTTPS | TCP      | `443` | `0.0.0.0/0` | Allows secure web traffic if SSL/TLS is configured later |
+
+### Why This Fix Worked
+
+Security groups act as virtual firewalls for EC2 instances.
+
+Even though the EC2 instance was running and had a public IPv4 address, SSH access could not work until the security group allowed inbound traffic on port 22 from my current IP address.
+
+After I updated the SSH source to My IP, AWS allowed my terminal to connect to the EC2 instance.
+
+### What I Learned
+
+I learned that SSH access depends on more than just the key pair and public IP address.
+
+For SSH to work, the following must all be correct:
+
+1. The EC2 instance must be running.
+2. The public IPv4 address must be correct.
+3. The correct username must be used.
+4. The correct private key must be used.
+5. The private key must have the correct permissions.
+6. The security group must allow inbound SSH traffic on port 22.
+7. The SSH source IP must match my current public IP address.
+
+I also learned that stopping and starting an EC2 instance can change its public IPv4 address if no Elastic IP is attached. In addition, my local network public IP can change, which means a security group rule restricted to My IP may need to be updated.
+
+---
+
+## Stage 10: Install and Start Nginx
+
+### Purpose
+
+Nginx is the web server software used to serve the website from the EC2 instance.
+
+After connecting to the instance through SSH, I installed Nginx, started the service, enabled it to run on boot, and tested the default Nginx page from a browser.
+
+### Commands Used
+
+```bash
+sudo apt update -y
+sudo apt install nginx -y
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
+```
+
+### Steps Taken
+1. I connected to the EC2 instance using SSH.
+2. I updated the package list using sudo apt update -y.
+3. I installed Nginx using sudo apt install nginx -y.
+4. I started the Nginx service.
+5. I enabled Nginx to start automatically when the instance boots.
+6. I checked the Nginx service status.
+7. I confirmed that Nginx showed active (running).
+8. I copied the EC2 public IPv4 address.
+9. I opened the public IPv4 address in my browser using HTTP.
+10. I confirmed that the default Nginx welcome page loaded successfully.
+
+![Nginx running](screenshots/09-nginx-service-running.png)
+![Nginx default page](screenshots/10-nginx-default-page.png)
+
+### Explanation
+
+Installing Nginx turned the EC2 instance into a web server. The browser was able to access the server because the instance was in a public subnet, had a public IPv4 address, and the security group allowed inbound HTTP traffic on port 80.
+
+### What I Learned
+
+I learned that launching an EC2 instance does not automatically make it a web server. A web server package such as Nginx must be installed and running before the instance can serve web content.
+
+I also learned that browser access depends on both the Nginx service running and the security group allowing HTTP traffic on port 80.
+
+---
+
+## Stage 11: Replace the Default Nginx Page with a Custom Webpage
+
+### Purpose
+
+After confirming that Nginx was installed and running, I replaced the default Nginx welcome page with a custom HTML webpage.
+
+This custom webpage proves that I can modify the default web content served by Nginx and host my own page from the EC2 instance.
+
+### Web Directory
+
+On Ubuntu, Nginx serves its default web files from:
+
+```text
+/var/www/html
+```
+The default Nginx page file is commonly:
+```text
+/var/www/html/index.nginx-debian.html
+```
+In this project, I edited the existing default Nginx HTML file and replaced its original content with my custom webpage HTML code.
+
+Commands Used:
+```bash
+sudo vi /var/www/html/index.nginx-debian.html
+cat /var/www/html/index.nginx-debian.html
+sudo systemctl restart nginx
+sudo systemctl status nginx
+```
+
+### Steps Taken
+1. I connected to the EC2 instance using SSH.
+2. I navigated to the default Nginx web directory at /var/www/html.
+3. I opened the default Nginx HTML file named index.nginx-debian.html using Nano.
+4. I removed the default Nginx welcome page content.
+5. I pasted my custom HTML and CSS code into the file.
+6. I included my name and deployment date on the page.
+7. I saved the file and exited Nano.
+8. I confirmed the file content from the terminal.
+9. I restarted the Nginx service.
+10. I checked that Nginx was still active and running.
+11. I opened the EC2 public IPv4 address in my browser.
+12. I confirmed that my custom webpage loaded successfully.
+
+![Custom Webpage](screenshots/11-custom-webpage-browser)
+
+### Explanation
+
+Nginx serves files from /var/www/html by default on Ubuntu. The file index.nginx-debian.html is the default Nginx landing page file used on Ubuntu-based Nginx installations.
+
+By editing this file and replacing its default content with my own HTML code, I changed what users see when they visit the EC2 instance public IPv4 address in a browser.
+
+The webpage was accessible because the EC2 instance was running, Nginx was active, HTTP traffic was allowed on port 80, and the public subnet had a route to the Internet Gateway.
+
+### What I Learned
+
+I learned that Nginx serves website files from a web root directory, and the content displayed in the browser depends on the HTML files inside that directory.
+
+I also learned that I can customize the default Nginx page either by editing the existing index.nginx-debian.html file or by creating a new index.html file in the same directory.
+
+Editing the default file worked for this project because it directly replaced the page Nginx was already serving.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
