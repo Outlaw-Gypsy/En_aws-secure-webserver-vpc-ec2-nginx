@@ -285,3 +285,115 @@ This route allows resources in the associated public subnet to send traffic to t
 I learned that a subnet is not public just because it has the word "public" in its name. A subnet becomes public when it is associated with a route table that has a default route to an Internet Gateway.
 
 ---
+
+## Stage 7: Launch an EC2 Instance Inside the Public Subnet
+
+### Purpose
+
+The EC2 instance acts as the virtual server that will run the Nginx web server.
+
+I launched the instance inside the public subnet so that it can be accessed from the internet through its public IPv4 address.
+
+### EC2 Configuration
+
+| Setting | Value |
+|---|---|
+| Instance Name | `cloud-webserver-ec2` |
+| AMI | `Ubuntu Server` |
+| Instance Type | `t3.micro` |
+| VPC | `cloud-webserver-vpc` |
+| Subnet | `cloud-webserver-public-subnet` |
+| Auto-assign Public IP | `Enabled` |
+| Key Pair | `cloud-webserver-key` |
+| Security Group | `cloud-webserver-sg` |
+
+### Steps Taken
+
+1. I opened the AWS Management Console.
+2. I searched for `EC2` and opened the EC2 dashboard.
+3. I clicked `Instances`.
+4. I clicked `Launch instances`.
+5. I entered the instance name `cloud-webserver-ec2`.
+6. I selected an Ubuntu Server AMI.
+7. I selected a free-tier instance type `t3.micro`.
+8. I created a key pair for SSH access.
+9. Under network settings, I selected my custom VPC named `cloud-webserver-vpc`.
+10. I selected the public subnet named `cloud-webserver-public-subnet`.
+11. I enabled auto-assign public IP.
+12. I created a security group named `cloud-webserver-sg`.
+13. I reviewed the configuration and clicked `Launch instance`.
+14. I waited until the instance state showed `Running`.
+15. I confirmed that the instance had a public IPv4 address.
+
+### Screenshot: EC2 Instance Running
+
+![EC2 Instance Running](screenshots/06-ec2-running.png)
+
+### Explanation
+
+The EC2 instance was launched inside the public subnet of the custom VPC. Because auto-assign public IP was enabled, AWS assigned a public IPv4 address to the instance.
+
+This public IP address will be used to access the Nginx webpage from a browser after the web server is installed and configured.
+
+### What I Learned
+
+I learned that launching an EC2 instance requires selecting the correct VPC and subnet. I also learned that an instance in a public subnet must have a public IP address before it can be accessed directly from the internet.
+
+---
+
+## Stage 8: Configure and Review Security Group Rules
+
+### Purpose
+
+A security group acts as a virtual firewall for an EC2 instance. It controls which inbound and outbound traffic is allowed.
+
+For this project, I configured the security group to allow web traffic while restricting SSH access to my own IP address.
+
+### Security Group Configuration
+
+| Type | Protocol | Port | Source | Purpose |
+|---|---|---:|---|---|
+| SSH | TCP | `22` | `My IP` | Allows secure terminal access to the EC2 instance |
+| HTTP | TCP | `80` | `0.0.0.0/0` | Allows users on the internet to access the website |
+| HTTPS | TCP | `443` | `0.0.0.0/0` | Allows secure web traffic if SSL/TLS is configured later |
+
+### Steps Taken
+
+1. I opened the AWS Management Console.
+2. I searched for `EC2` and opened the EC2 dashboard.
+3. I clicked `Security Groups` from the left navigation menu.
+4. I selected the security group attached to my EC2 instance.
+5. I reviewed the inbound rules.
+6. I confirmed that SSH on port `22` was restricted to my own IP address.
+7. I confirmed that HTTP on port `80` was open to users on the internet.
+8. I confirmed that HTTPS on port `443` was added for secure web traffic readiness.
+9. I avoided opening unnecessary ports.
+
+### Screenshot: Security Group Rules
+
+![Security Group Rules](screenshots/07-security-group-rules.png)
+
+### Explanation
+
+The security group protects the EC2 instance by controlling allowed inbound traffic.
+
+SSH access is restricted to my own IP address to reduce the risk of unauthorized login attempts. HTTP is open to the internet because users need to access the hosted website through a browser. HTTPS is also included as a best-practice web port, even though SSL/TLS may be configured later.
+
+### What I Learned
+
+I learned that security groups are important for controlling access to cloud resources. Instead of opening all ports to everyone, I should allow only the ports required for the application to work.
+
+### Security Best Practice Applied
+
+The most important security decision in this stage was restricting SSH access.
+
+Instead of allowing SSH from anywhere:
+
+```text
+0.0.0.0/0
+```
+I restricted SSH to:
+```text
+My IP
+```
+This follows the principle of least privilege because only my current IP address can attempt to connect to the instance through SSH.
