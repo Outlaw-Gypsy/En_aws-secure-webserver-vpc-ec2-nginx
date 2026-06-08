@@ -675,10 +675,143 @@ I also learned that I can customize the default Nginx page either by editing the
 
 Editing the default file worked for this project because it directly replaced the page Nginx was already serving.
 
+---
 
+## Stage 12: Bash Deployment Script
 
+### Purpose
 
+As a bonus task, I created a Bash deployment script to automate the Nginx installation and web page deployment process.
 
+The script updates the server, installs Nginx, starts the Nginx service, enables Nginx on boot, creates a custom webpage, restarts Nginx, and checks the service status.
+
+### Script Name
+
+```text
+deploy-nginx-webserver.sh
+```
+### Script Tasks
+
+The script performs the following actions:
+
+1. Updates the package list.
+2. Installs Nginx.
+3. Starts the Nginx service.
+4. Enables Nginx to start automatically on boot.
+5. Writes a custom HTML page into the Nginx web directory.
+6. Restarts Nginx.
+7. Checks the Nginx service status.
+
+### Script Content
+```bash
+#!/bin/bash
+
+echo "Starting Nginx web server deployment..."
+
+echo "Updating package list..."
+sudo apt update -y
+
+echo "Installing Nginx..."
+sudo apt install nginx -y
+
+echo "Creating custom web page..."
+sudo tee /var/www/html/index.nginx-debian.html > /dev/null <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My AWS Web Server</title>
+</head>
+<body>
+  <h1>Welcome to My AWS Web Server</h1>
+  <p>Deployed by Your Name</p>
+  <p>Deployment Date: June 2026</p>
+  <p>This web server is running on an AWS EC2 instance using Nginx.</p>
+</body>
+</html>
+EOF
+
+echo "Testing Nginx configuration..."
+sudo nginx -t
+
+echo "Starting Nginx service..."
+sudo systemctl start nginx
+
+echo "Enabling Nginx to start on boot..."
+sudo systemctl enable nginx
+
+echo "Reloading Nginx..."
+sudo systemctl reload nginx
+
+echo "Checking Nginx status..."
+sudo systemctl status nginx 
+
+echo "Deployment completed successfully."
+```
+### How to Make the Script Executable
+```bash
+chmod +x deploy-nginx-webserver.sh
+```
+### How to Run the Script
+```bash
+./deploy-nginx-webserver.sh
+```
+
+### Explanation
+
+The script automates the manual steps used to install and configure Nginx. This is useful because automation reduces repetition, improves consistency, and makes server setup easier to reproduce.
+
+### What I Learned
+
+I learned that Bash scripts can be used to automate server configuration tasks. Instead of manually typing each command, I can place the commands in a script and run them as one repeatable deployment process.
+
+---
+
+## Skills Demonstrated
+
+This project demonstrates hands-on experience with:
+
+- AWS VPC networking
+- CIDR block planning
+- Public subnet creation
+- Internet Gateway configuration
+- Route table configuration
+- Subnet-route table association
+- EC2 instance deployment
+- Public IPv4 addressing
+- Security group configuration
+- SSH access management
+- Linux server administration
+- Nginx installation and configuration
+- Static web page deployment
+- Bash scripting and deployment automation
+- Cloud troubleshooting
+- Technical documentation
+
+---
+
+## Repository Structure
+
+```text
+aws-secure-webserver-vpc-ec2-nginx/
+│
+├── README.md
+├── deploy-nginx-webserver.sh
+├── architecture-diagram.pdf
+└── screenshots/
+    ├── 01-architecture-diagram.png
+    ├── 02-vpc-created.png
+    ├── 03-public-subnet-created.png
+    ├── 04-internet-gateway-attached.png
+    ├── 05-route-table-configured.png
+    ├── 06-ec2-instance-running.png
+    ├── 07-security-group-rules.png
+    ├── 08-ssh-connected.png
+    ├── 09-nginx-service-running.png
+    ├── 10-nginx-default-page.png
+    ├── 11-custom-webpage-terminal.png
+    └── 12-custom-webpage-browser.png
+```
 
 
 
